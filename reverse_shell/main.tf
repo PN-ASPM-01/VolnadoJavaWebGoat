@@ -88,7 +88,7 @@ resource "aws_key_pair" "attacker" {
   public_key = "${var.public_key}"
 }
 
-resource "aws_instance" "receiver" {
+/* resource "aws_instance" "receiver" {
   ami           = "${data.aws_ami.amznlinux.id}"
   instance_type = "t2.micro"
   subnet_id = "${aws_subnet.subnet.id}"
@@ -102,4 +102,4 @@ EOF
   tags = {
     Name = "VulnadoReverseShellReceiver"
   }
-}
+} */

@@ -12,4 +12,9 @@ public class CowController {
     String cowsay(@RequestParam(defaultValue = "I love Linux!") String input) {
         return Cowsay.run(input);
     }
+public class CowController2 {
+    @RequestMapping(value = "/cowsay")
+    String cowsay(@RequestParam(defaultValue = "I love Linux!") String input) {
+        return Cowsay.run(input);
+    }
 }

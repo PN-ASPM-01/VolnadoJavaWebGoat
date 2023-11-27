@@ -43,15 +43,22 @@ public class Postgres {
             stmt.executeUpdate("DELETE FROM comments");
 
             // Insert seed data
-            insertUser("admin", "!!SuperSecretAdmin!!");
+         
            // Test false positive
+            // will insert few lines
+            //Line 1
+            //Line 2
+            //Line 3
+            //Line 4
+            // Admin and Alice are marked false positive
+            insertUser("admin", "!!SuperSecretAdmin!!");
             insertUser("alice", "AlicePassword!");
             insertUser("bob", "BobPassword!");
+            // Eve, rick and alice1, rick 1 are vulnerabilities
             insertUser("eve", "$EVELknev^l");
             insertUser("rick", "!GetSchwifty!");
-            insertUser("rick-Ali", "!GetSchwifty!");
-            insertComment("rick", "cool dog m8");
-            insertComment("alice", "OMG so cute!");
+            insertComment("rick1", "cool dog m8");
+            insertComment("alice1", "OMG so cute!");
             c.close();
         } catch (Exception e) {
             System.out.println(e);

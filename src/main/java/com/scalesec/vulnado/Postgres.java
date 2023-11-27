@@ -44,6 +44,7 @@ public class Postgres {
 
             // Insert seed data
             insertUser("admin", "!!SuperSecretAdmin!!");
+           // Test false positive
             insertUser("alice", "AlicePassword!");
             insertUser("bob", "BobPassword!");
             insertUser("eve", "$EVELknev^l");

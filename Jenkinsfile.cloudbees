@@ -10,8 +10,8 @@
       //   agent { label 'gce-node' }
 
       environment {
-        MODULE = "VolnadoJavaWebGoat"
-        MODULE_ENV_NAME = 'dev'
+        MODULE = "volnadojavawebgoat"
+        MODULE_ENV_NAME = 'sbx5'
         ECR_ENV_NAME = 'sbx5'
         ECR_REGION = 'us-east-1'
         PROJECT = 'cbc'
@@ -23,7 +23,7 @@
         AUTHOR = 'cbc-infra@cloudbees.com'
         VENDOR = 'CloudBees'
         BASE_BUILD_IMAGE = 'maven:3.8.7-eclipse-temurin-17'
-        BASE_FINAL_IMAGE = '700386920060.dkr.ecr.us-east-1.amazonaws.com/cbc/cbc-fips-eclipse-temurin:20231130-1255'
+        BASE_FINAL_IMAGE = 'eclipse-temurin:17-jammy'
       }
 
       options {

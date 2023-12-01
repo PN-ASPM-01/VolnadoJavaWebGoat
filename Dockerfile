@@ -17,10 +17,19 @@ ENV LOG_DIR=/tmp/logs/
 ENV LOG_LEVEL=INFO
 
 # Maven deploy
-RUN mvn -e -s .m2/settings.xml clean deploy sonar:sonar \
-                -Dsonar.projectKey=${PROJECT_KEY} \
-                -Dsonar.host.url=${SONAR_HOST} \
-                -Dsonar.login=${SONAR_LOGIN}
+# RUN mvn -e -s .m2/settings.xml clean deploy sonar:sonar \
+#                 -Dsonar.projectKey=${PROJECT_KEY} \
+#                 -Dsonar.host.url=${SONAR_HOST} \
+#                 -Dsonar.login=${SONAR_LOGIN}
+
+#Maven Build
+
+RUN apt-get update && \
+    apt-get install build-essential maven default-jdk cowsay netcat -y && \
+    update-alternatives --config javac
+COPY . .
+
+CMD ["mvn", "spring-boot:run"]
 
 ######## Dependencies ########
 FROM alpine:3.16 as deps

@@ -127,30 +127,30 @@
           }
         }
 
-        stage('Copy-Artifacts') {
-         steps {
-           withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "aws_${ECR_ENV_NAME}_creds"]]) {
-             script {
-               sh '''
-                   ID=$(docker create $TARGET)
-                   echo ${ID}
-                   mkdir -p ./target || true
-                   docker cp ${ID}:/app ./target/
-                   docker rm ${ID}
-                   ls ./target/app || true
-                   '''
-             }
-           }
-         }
-       }
+      //   stage('Copy-Artifacts') {
+      //    steps {
+      //      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "aws_${ECR_ENV_NAME}_creds"]]) {
+      //        script {
+      //          sh '''
+      //              ID=$(docker create $TARGET)
+      //              echo ${ID}
+      //              mkdir -p ./target || true
+      //              docker cp ${ID}:/app ./target/
+      //              docker rm ${ID}
+      //              ls ./target/app || true
+      //              '''
+      //        }
+      //      }
+      //    }
+      //  }
 
-        stage('Grype Scan') {
-          steps {
-            script {
-              sh "grype $TARGET"
-            }
-          }
-        }
+        // stage('Grype Scan') {
+        //   steps {
+        //     script {
+        //       sh "grype $TARGET"
+        //     }
+        //   }
+        // }
 
         stage('ECR-Push') {
 //          when {

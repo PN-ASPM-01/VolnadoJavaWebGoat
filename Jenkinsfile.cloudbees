@@ -12,7 +12,7 @@
       environment {
         MODULE = "VolnadoJavaWebGoat"
         MODULE_ENV_NAME = 'dev'
-        ECR_ENV_NAME = 'dev'
+        ECR_ENV_NAME = 'sbx5'
         ECR_REGION = 'us-east-1'
         PROJECT = 'cbc'
         VERSION = "${PROJECT}-${MODULE_ENV_NAME}"

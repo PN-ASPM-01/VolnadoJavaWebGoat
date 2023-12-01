@@ -24,6 +24,8 @@
         VENDOR = 'CloudBees'
         BASE_BUILD_IMAGE = 'maven:3.8.7-eclipse-temurin-17'
         BASE_FINAL_IMAGE = 'eclipse-temurin:17-jammy'
+        DOCKER_FILE = "Dockerfile.artifact"
+        DOCKER_FILE_FINAL = "Dockerfile.final"
       }
 
       options {
@@ -89,43 +91,81 @@
 //          }
 //        }
 
-        stage('Build') {
-          steps {
-            withEnv(['TARGET_GIT_TAG=' + TARGET_GIT_TAG, 'GIT_URL=' + GIT_URL, 'GIT_TAG=' + GIT_TAG, 'TARGET=' + TARGET]) {
-              withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: "aws_${ECR_ENV_NAME}_creds"],
 
-                  [$class: 'StringBinding',
-                  credentialsId: 'sonarqube_token',
-                  variable: 'SONAR_LOGIN'],
 
-                  [$class: 'FileBinding',
-                  credentialsId: 'maven-settings-xml',
-                  variable: 'SETTINGS_XML']]) {
-              sh "mkdir -p .m2 || true"
-              sh "cp $SETTINGS_XML .m2/settings.xml"
-              sh '''
-                DOCKER_BUILDKIT=0 docker build --pull -t $TARGET . \
-                    --label "org.opencontainers.image.created=`date -u +%Y-%m-%dT%H:%M:%SZ`" \
-                    --label "org.opencontainers.image.authors=${AUTHOR}" \
-                    --label "org.opencontainers.image.url=${TARGET_GIT_TAG}" \
-                    --label "org.opencontainers.image.source=${GIT_URL}" \
-                    --label "org.opencontainers.image.version=${GIT_TAG}" \
-                    --label "org.opencontainers.image.revision=${GIT_COMMIT}" \
-                    --label "org.opencontainers.image.ref.name=${MODULE}" \
-                    --label "org.opencontainers.image.vendor=${VENDOR}" \
-                    --label "com.cloudbees.cbc.baseimage.url=${BASE_FINAL_IMAGE}" \
-                    --build-arg "PROJECT_KEY=${MODULE}" \
-                    --build-arg "SONAR_HOST=${SONAR_HOST}" \
-                    --build-arg "SONAR_LOGIN=${SONAR_LOGIN}" \
-                    --build-arg "BASE_BUILD_IMAGE=${BASE_BUILD_IMAGE}" \
-                    --build-arg "BASE_FINAL_IMAGE=${BASE_FINAL_IMAGE}"
-                    '''
-              }
+      stage('Dockerfile') {
+            steps {
+                script {
+                        sh '''
+                          cat > ${DOCKER_FILE} << EOF
+                          FROM maven:3.8.7-eclipse-temurin-17 AS build
+                          ADD . /src
+                          WORKDIR /src
+                          RUN mvn -Dmaven.test.failure.ignore clean package
+                          RUN ls target
+                          EOF
+                        '''
+                }
             }
-          }
         }
+
+        stage('Build-Jar') {
+            steps {
+                script {
+                    sh '''
+                        docker build -t ${MODULE}  -f $DOCKER_FILE .
+                        ID=$(docker create ${MODULE})
+                        echo ${ID}
+                        docker cp ${ID}:/src/target ./
+                        docker rm ${ID}
+                        pwd
+                        ls target
+                        '''
+                }
+            }
+        }
+    }
+
+
+    stage('Dockerfile-final') {
+            steps {
+                script {
+                        sh '''
+                          cat > ${DOCKER_FILE_FINAL} << EOF
+                          FROM maven:3.8.7-eclipse-temurin-17 AS build
+                          ADD target /app
+                          RUN ls /app
+                          EOF
+                        '''
+                }
+            }
+        }
+   //     stage('Build') {
+   //       steps {
+   //         withEnv(['TARGET_GIT_TAG=' + TARGET_GIT_TAG, 'GIT_URL=' + GIT_URL, 'GIT_TAG=' + GIT_TAG, 'TARGET=' + TARGET]) {
+   //           withCredentials([[
+   //               $class: 'AmazonWebServicesCredentialsBinding',
+   //               credentialsId: "aws_${ECR_ENV_NAME}_creds"],
+
+   //               [$class: 'StringBinding',
+   //               credentialsId: 'sonarqube_token',
+   //               variable: 'SONAR_LOGIN'],
+
+   //               [$class: 'FileBinding',
+   //               credentialsId: 'maven-settings-xml',
+   //               variable: 'SETTINGS_XML']]) {
+   //           sh "mkdir -p .m2 || true"
+   //           sh "cp $SETTINGS_XML .m2/settings.xml"
+   //           sh '''
+   //             DOCKER_BUILDKIT=0 docker build --pull -t $TARGET -f Dockerfile.final . \
+   //                 --label "org.opencontainers.image.created=`date -u +%Y-%m-%dT%H:%M:%SZ`" \
+   //                 --build-arg "BASE_BUILD_IMAGE=${BASE_BUILD_IMAGE}" \
+   //                 --build-arg "BASE_FINAL_IMAGE=${BASE_FINAL_IMAGE}"
+   //                 '''
+   //           }
+   //         }
+   //       }
+   //     }
 
       //   stage('Copy-Artifacts') {
       //    steps {
